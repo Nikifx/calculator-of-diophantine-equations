@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter as tk 
 from tkinter import scrolledtext
 from artificial_immune_system import artificial_immune_system
 
@@ -57,7 +57,7 @@ class DiophantineSolverApp:
         else:
             output = "Решение не найдено."
 
-        output += f"\nВремя выполнения искусственной иммунной сети: {execution_time:.2f} секунды."
+        output +=  f"\nВремя выполнения искусственной иммунной сети: {execution_time:.2f} секунды."
 
         self.solutions_text.config(state=tk.NORMAL)
         self.solutions_text.delete('1.0', tk.END)
