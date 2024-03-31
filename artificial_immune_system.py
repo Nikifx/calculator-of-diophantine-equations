@@ -5,17 +5,24 @@ from time import time
 from json import dump, load
 import matplotlib.pyplot as plt
 
-# Функция для преобразования строки уравнения в объект Eq и извлечения переменных
-def parse_equation(equation):
-    lhs, rhs = map(lambda x: sympify(x.replace('^', '**')), equation.split('='))
-    eq = Eq(lhs, rhs)
-    variables = sorted(eq.free_symbols, key=lambda x: str(x))
-    return eq, variables
+# Функция для преобразования строки в список объектов Eq и извлечения переменных
+def parse_equations(equations):
+    equations = equations.split(',')
+    eqs = []
+    variables = set()
+    for equation in equations:
+        lhs, rhs = map(lambda x: sympify(x.replace('^', '**')), equation.split('='))
+        eq = Eq(lhs, rhs)
+        eqs.append(eq)
+        variables.update(eq.free_symbols)
+    variables = sorted(variables, key=lambda x: str(x))
+    return eqs, variables
 
 # Целевая функция
 def D(*args):
     substitutions = dict(zip(variables, args))
-    return abs(eq.lhs.subs(substitutions) - eq.rhs.subs(substitutions))
+    total_difference = sum(abs(eq.lhs.subs(substitutions) - eq.rhs.subs(substitutions)) for eq in eqs)
+    return total_difference
 
 # Генерация начальной популяции
 def generate_population(pop_size):
@@ -125,13 +132,13 @@ def compression(population, threshold):
     return [cell for i, cell in enumerate(population) if i not in to_remove]
 
 # Основная функция
-def artificial_immune_system(equation, pop_size, max_pop, n_c=10, threshold=0.2):
+def artificial_immune_system(equations, pop_size, max_pop, n_c=10, threshold=0.2):
     # Запускаем таймер для измерения времени выполнения
     start_time = time()
     
-    global eq, variables, comp_count
+    global eqs, variables, comp_count
     # Разбор уравнения на составляющие и сохранение в глобальные переменные
-    eq, variables = parse_equation(equation)
+    eqs, variables = parse_equations(equations)
     # Определение количества компонент (переменных в уравнении)
     comp_count = len(variables)
     # Генерация начальной популяции
@@ -180,7 +187,7 @@ def artificial_immune_system(equation, pop_size, max_pop, n_c=10, threshold=0.2)
 if __name__ == "__main__":
     # Запуск системы
     result, execution_time = artificial_immune_system(
-        equation="x^3 + y^3 + z^3 = 2", 
+        equations="a = b, (1 - 9*a^3)^3 + (3*b - 9*b^4)^3 + 205891132094648 = 0", 
         pop_size=50, 
         max_pop=200
     )
